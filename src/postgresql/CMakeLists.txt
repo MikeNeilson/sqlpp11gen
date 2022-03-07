@@ -1,4 +1,4 @@
-add_executable( sqlpp11pggen main.cpp config.cpp data_dictionary.cpp)
+add_executable( sqlpp11pggen main.cpp config.cpp data_dictionary.cpp database.cpp)
 target_link_libraries(sqlpp11pggen 
                       sqlpp11::sqlpp11
                       sqlpp11::postgresql
