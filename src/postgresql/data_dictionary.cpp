@@ -2,6 +2,8 @@
 
 namespace pg {
     namespace information_schema {
+        schemata_::SchemataTable schemata;
         views_::ViewTable views;
+        columns_::ColumnTable columns;
     }
 }

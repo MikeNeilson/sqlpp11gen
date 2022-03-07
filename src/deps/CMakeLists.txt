@@ -32,3 +32,9 @@ FetchContent_Declare(sqlpp11
 add_subdirectory(sqlpp11)
 
 
+FetchContent_Declare(mustache
+  GIT_REPOSITORY https://github.com/kainjow/Mustache/
+  GIT_TAG v4.1
+)
+
+add_subdirectory(mustache)
