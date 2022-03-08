@@ -28,8 +28,8 @@ const option::Descriptor usage[] = {
     { USERNAME,   0,"u","user",      Arg::Required,         "  \t-u <username>,--user=<username>  \tusername for Postgres server"},
     { PASSWORD,   0,"a","password",  Arg::Required,         "  \t-a <password>,--password=<password>  \tpassword for the user"},
     { DBNAME,     0,"d","database",  Arg::Required,         "  \t-d <databasename>,--database=<databasename>  \tdatabasename"},
-    { NAMESPACE,  0,"n","namespace", Arg::Optional, "  \t-n,--namespace=  \tnamespace to prefix with. defaults to database name in lowercase."},
-    { OUTPUT,     0,"o","output",    Arg::Optional, "  \t-o,--output=  \tname of file to output to. Defaults to <database name in lowercase>.h"},
+    { NAMESPACE,  0,"n","namespace", Arg::Required, "  \t-n,--namespace=  \tnamespace to prefix with. defaults to database name in lowercase."},
+    { OUTPUT,     0,"o","output",    Arg::Required, "  \t-o,--output=  \tname of file to output to. Defaults to <database name in lowercase>.h"},
     { 0, 0, 0, 0, 0, 0 }
 };
 
@@ -82,9 +82,17 @@ Config::Config(int argc, char **argv) {
     if( options[PORT]){
         db_config->port=atoi(options[PORT].arg);
     } 
-
-    this->output_namespace = trim(tolower(options[DBNAME].arg));
+    
+    this->output_namespace = trim(tolower(options[DBNAME].arg));    
     this->output_filename = trim(tolower(options[DBNAME].arg) + ".h");
+
+    if(options[NAMESPACE]) {
+        this->output_namespace = trim(options[NAMESPACE].arg);
+    }
+
+    if(options[OUTPUT]) {
+        this->output_filename = trim(options[OUTPUT].arg);
+    }
 }
     
 const db_config_ptr Config::get_db_config() const{

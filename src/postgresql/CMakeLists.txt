@@ -6,3 +6,4 @@ target_link_libraries(sqlpp11pggen
                       OpenSSL::Crypto               
                       pthread
 )
+file(COPY field.mustache DESTINATION ${CMAKE_BINARY_DIR}/)

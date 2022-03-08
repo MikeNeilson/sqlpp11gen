@@ -1,0 +1,35 @@
+
+namespace gen_{{view_name}} {
+
+    {{#fields}}
+    struct {{name}} {
+        struct _alias_t {
+            static constexpr const char _literal [] = "{{name}}";
+            using _name_t = sqlpp::make_char_sequence<sizeof(_literal),_literal>;
+            template<typename T>
+            struct _member_t {
+                T {{name}};
+                T& operator()(){ return {{name}}; }
+                const T& operator()() const { return {{name}};}
+            };
+        };
+        using _traits = sqlpp::make_traits<{{traits}}>;        
+    };
+
+    {{/fields}}
+
+    struct {{view_name}} : public sqlpp::table_t<{{view_name}}{{#fields}},{{name}}{{/fields}}> {
+        struct _alias_t {
+            static constexpr const char _literal [] = "{{schema_name}}.{{view_name}}";
+            using _name_t = sqlpp::make_char_sequence<sizeof(_literal),_literal>;
+            template<typename T>
+            struct _member_t {
+                T {{view_name}};
+                T& operator()(){ return {{view_name}}; }
+                const T& operator()() const { return {{view_name}}; }
+            };
+        };
+    };
+
+}
+constexpr gen_{{view_name}}::{{view_name}} {{view_name}};
