@@ -12,6 +12,7 @@ using namespace kainjow::mustache;
 auto &views = pg::information_schema::views;
 auto &columns = pg::information_schema::columns;
 auto &schemata = pg::information_schema::schemata;
+auto &tables = pg::information_schema::tables;
 
 namespace pg {
     namespace generator {
@@ -29,7 +30,8 @@ namespace pg {
             {"binary","sqlpp::text"},
             {"timestamp with time zone","sqlpp::time_point"},
             {"timestamp without time zone","sqlpp::time_point"},
-            {"boolean","sqlpp::boolean"}
+            {"boolean","sqlpp::boolean"},
+            {"interval","sqlpp::text"}
         };
 
         
@@ -49,7 +51,7 @@ namespace pg {
             for( auto &schema: this->schemas ) {
                 gather_view_info(schema);
                 // types?
-                // tables
+                gather_table_info(schema);
                 // routines
             }       
         }
@@ -66,12 +68,16 @@ namespace pg {
                                                     ))) {
                     cout << result.table_schema << "." << result.table_name << endl;
                     data view{data::type::object};
-                    view["schema_name"] = result.table_catalog.text;
+                    view["schema_name"] = result.table_schema.text;
                     view["view_name"] = result.table_name.text;
                     data fields{data::type::list};
                     for( auto &res_columns: db(select(all_of(columns))
                                                 .from(columns)
-                                                .where( columns.table_name == result.table_name))) {
+                                                .where( columns.table_name == result.table_name
+                                                        and 
+                                                        columns.table_schema == result.table_schema
+                                                        and
+                                                        columns.table_catalog == result.table_catalog))) {
                         cout << "\t" << res_columns.column_name << ":" << res_columns.data_type << ":" << res_columns.is_nullable << endl;                        
                         data field{{data::type::object}};
                         field["name"] = res_columns.column_name.text;
@@ -82,21 +88,62 @@ namespace pg {
                     }   
                     view.set("fields",fields);   
                     outputViews.push_back(view);
-                }
+            }
         }
 
+        void database::gather_table_info(const std::string &schema){
+            for( auto &result: db(select(all_of(tables))
+                                                .from(tables)
+                                                .where( 
+                                                    tables.table_catalog == this->catalog
+                                                    and
+                                                    tables.table_schema == schema
+                                                    and
+                                                    tables.table_type == "BASE TABLE"
+                                                    ))) {
+                    cout << result.table_schema << "." << result.table_name << endl;
+                    data table{data::type::object};
+                    table["schema_name"] = result.table_schema.text;
+                    table["table_name"] = result.table_name.text;
+                    data fields{data::type::list};
+                    for( auto &res_columns: db(select(all_of(columns))
+                                                .from(columns)
+                                                .where( columns.table_name == result.table_name 
+                                                        and 
+                                                        columns.table_schema == result.table_schema
+                                                        and
+                                                        columns.table_catalog == result.table_catalog))) {
+                        cout << "\t" << res_columns.column_name << ":" << res_columns.data_type << ":" << res_columns.is_nullable << endl;
+                        data field{{data::type::object}};
+                        field["name"] = res_columns.column_name.text;
+                        field["traits"] = data_type_map[res_columns.data_type.text];
+                              
+                        fields << field;
+                        
+                    }   
+                    table.set("fields",fields);   
+                    outputTables.push_back(table);
+            }
+        }
+
+        using mustache_template = kainjow::mustache::mustache;
+        unique_ptr<mustache_template> load_template(const string& template_file ){
+            stringstream file_data;
+            ifstream file(template_file);
+            file_data << file.rdbuf();            
+            unique_ptr<mustache_template> tmpl(new mustache_template(file_data.str()));
+            if( !tmpl->is_valid() ) {                
+                throw new runtime_error("Failed to load template(" + template_file+ "):" + tmpl->error_message() );
+            }
+            tmpl->set_custom_escape([](const std::string &r){return r;});
+            return tmpl;
+        }
 
         void database::render(ofstream &out) {
             cout << "Information gathered, rending header file." << endl;
-            stringstream file_data;
-            ifstream file("field.mustache");
-            file_data << file.rdbuf();            
-            kainjow::mustache::mustache tmpl(file_data.str());
-            if( !tmpl.is_valid() ) {
-                cerr << tmpl.error_message() << endl;
-            }
-
-            tmpl.set_custom_escape([](const std::string &r){return r;});
+            
+            unique_ptr<mustache_template> viewTmpl = load_template("field.mustache");
+            unique_ptr<mustache_template> tableTmpl = load_template("tables.mustache");                        
 
             out << "#pragma once" << endl;
             out << "#include <sqlpp11/sqlpp11.h>" << endl << endl;
@@ -106,13 +153,19 @@ namespace pg {
             out << endl;
             out << "\t namespace views {" << endl;
             for(auto &view: outputViews){            
-                tmpl.render(view,[&out](const string &rendered){                    
+                viewTmpl->render(view,[&out](const string &rendered){                    
                     out << rendered;
                 });
             }
             out << "\t }" << endl;
 
-            out << "/* tables */" << endl;
+            out << "\t namespace tables {" << endl;
+            for( auto &table: outputTables){
+                cout << table["table_name"].string_value() << endl;
+                tableTmpl->render(table,out);
+            }
+            out << "\t }" << endl;
+            
             out << "/* routines */" << endl;
 
             for( auto &ns: namespaces ) {

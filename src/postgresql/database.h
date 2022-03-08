@@ -15,12 +15,13 @@ namespace pg {
             std::vector<std::string> namespaces;
 
             std::vector<kainjow::mustache::data> outputViews;
-
+            std::vector<kainjow::mustache::data> outputTables;
 
             public:
                 database(sqlpp::postgresql::connection &db, const std::string &catalog, const std::string &desired_namespace);
                 void generate();
                 void gather_view_info( const std::string &schema );
+                void gather_table_info( const std::string &schema );
 
                 void render(std::ofstream& out);
         };

@@ -7,3 +7,4 @@ target_link_libraries(sqlpp11pggen
                       pthread
 )
 file(COPY field.mustache DESTINATION ${CMAKE_BINARY_DIR}/)
+file(COPY tables.mustache DESTINATION ${CMAKE_BINARY_DIR}/)

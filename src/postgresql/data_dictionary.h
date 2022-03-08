@@ -196,6 +196,40 @@ namespace pg {
         }
         extern columns_::ColumnTable columns;
 
+        struct table_type {
+                struct _alias_t {
+                    static constexpr const char _literal [] = "table_type";
+                    using _name_t = sqlpp::make_char_sequence<sizeof(_literal),_literal>;
+                    template<typename T>
+                    struct _member_t {
+                        T table_type;
+                        T& operator()(){ return table_type; }
+                        const T& operator()() const { return table_type; }
+                    };
+                };
+                using _traits = sqlpp::make_traits<sqlpp::varchar>;
+            };
+
+        namespace tables_ {
+
+            struct TableTable : public sqlpp::table_t<TableTable,table_catalog,table_schema,table_name,table_type> {
+                struct _alias_t {
+                    static constexpr const char _literal [] = "information_schema.tables";
+                    using _name_t = sqlpp::make_char_sequence<sizeof(_literal),_literal>;
+                    template<typename T>
+                    struct _member_t {
+                        T viewTable;
+                        T& operator()(){ return viewTable; }
+                        const T& operator()() const { return viewTable; }
+                    };
+                };
+
+            };
+
+            
+        }
+        extern tables_::TableTable tables;
+
 
     }
 }

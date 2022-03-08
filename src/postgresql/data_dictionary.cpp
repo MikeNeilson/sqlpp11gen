@@ -5,5 +5,6 @@ namespace pg {
         schemata_::SchemataTable schemata;
         views_::ViewTable views;
         columns_::ColumnTable columns;
+        tables_::TableTable tables;
     }
 }
