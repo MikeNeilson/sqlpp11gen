@@ -10,6 +10,11 @@ postgres information tables to extract the columns and types for each object.
 
 Currently only handles Postgres as that is the database I use
 
+It of course depends on https://github.com/rbock/sqlpp11.
+As well as https://github.com/kainjow/Mustache
+
+Both of which should download automatically during the cmake build process.
+
 # To build
 
 ```
