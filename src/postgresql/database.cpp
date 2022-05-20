@@ -162,7 +162,9 @@ namespace pg {
             out << "\t namespace tables {" << endl;
             for( auto &table: outputTables){
                 cout << table["table_name"].string_value() << endl;
-                tableTmpl->render(table,out);
+                tableTmpl->render(table, [&out](const string &rendered) {
+                    out << rendered;
+                });
             }
             out << "\t }" << endl;
             
