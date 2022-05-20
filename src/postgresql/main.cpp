@@ -8,12 +8,14 @@
 
 using namespace std;
 
-int main( int argc, char *argv[] ){        
-    try{
-        Config config(argc,argv);
+int main(int argc, char *argv[]) {
+    try {
+        Config config(argc, argv);
+        auto conf = *config.get_db_config();
+        auto connectionString = "postgres://" + conf.user + ":PASSWORD@" + conf.host + ":" + conf.port + "/" + conf.dbname;
+        cout << "Connecting to" << connectionString << endl;
 
-        cout << "Connecting to " << config.get_db_config() << endl;
-        sqlpp::postgresql::connection db(config.get_db_config());    
+        sqlpp::postgresql::connection db(config.get_db_config());
 
         pg::generator::database generator(db,config.get_db_config()->dbname,config.get_namespace());
         generator.generate();
