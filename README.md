@@ -25,8 +25,6 @@ cd build
 cmake ..
 ```
 
-Still working out details. the file "field.mustache" must be in the current directory. for the sqlpp11pggen to find it.
-
 |option|default|description|
 |------|--------|-----------|
 |-h,--host=&lt;hostname&gt;|localhost|hostname of the postgres server|
