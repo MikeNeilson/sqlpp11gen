@@ -143,7 +143,7 @@ namespace pg {
             cout << "Information gathered, rending header file." << endl;
             
             unique_ptr<mustache_template> viewTmpl = load_template("field.mustache");
-            unique_ptr<mustache_template> tableTmpl = load_template("tables.mustache");                        
+            unique_ptr<mustache_template> tableTmpl = load_template("table.mustache");
 
             out << "#pragma once" << endl;
             out << "#include <sqlpp11/sqlpp11.h>" << endl << endl;
